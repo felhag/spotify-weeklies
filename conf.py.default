@@ -1,0 +1,10 @@
+clientId = ''
+clientSecret = ''
+redirectUrl = ''
+transfers = [{
+    'src': ['', ''],
+    'target': ['']
+}, {
+    'src': [''],
+    'target': ['', '']
+}]
