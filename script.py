@@ -5,6 +5,7 @@ from conf import *
 sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id=clientId,
                                                client_secret=clientSecret,
                                                redirect_uri=redirectUrl,
+                                               open_browser=False,
                                                scope="playlist-modify-private playlist-modify-public"))
 for transfer in transfers:
     sources = transfer['src']
