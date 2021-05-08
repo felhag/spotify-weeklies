@@ -7,11 +7,20 @@ sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id=clientId,
                                                redirect_uri=redirectUrl,
                                                scope="playlist-modify-private playlist-modify-public"))
 for transfer in transfers:
+    sources = transfer['src']
+    targets = transfer['target']
     uris = []
-    for src in transfer['src']:
+
+    for src in sources:
         playlist = sp.playlist(playlist_id=src)
         for track in playlist['tracks']['items']:
             uris.append(track['track']['uri'])
 
-    for target in transfer['target']:
+    print(f'found {str(len(uris))} tracks in {str(len(sources))} playlists')
+
+    for target in targets:
         sp.playlist_add_items(playlist_id=target, items=uris)
+
+    print(f'added {str(len(uris))} tracks to {str(len(targets))} playlists')
+
+print('Done!')
