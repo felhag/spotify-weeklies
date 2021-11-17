@@ -2,9 +2,11 @@ clientId = ''
 clientSecret = ''
 redirectUrl = ''
 transfers = [{
+    'username': '',
     'src': ['', ''],
     'target': ['']
 }, {
+    'username': '',
     'src': [''],
     'target': ['', '']
 }]
