@@ -1,18 +1,24 @@
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
+from spotipy.oauth2 import CacheFileHandler
 from datetime import date
 from conf import *
 
-sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id=clientId,
-                                               client_secret=clientSecret,
-                                               redirect_uri=redirectUrl,
-                                               open_browser=False,
-                                               scope="playlist-modify-private playlist-modify-public playlist-read-private"))
 
-playlists = sp.current_user_playlists()['items']
+def get_api(username):
+    handler = CacheFileHandler(cache_path='./.cache/' + username, username=username)
+    auth_manager = SpotifyOAuth(client_id=clientId,
+                                client_secret=clientSecret,
+                                cache_handler=handler,
+                                redirect_uri=redirectUrl,
+                                open_browser=False,
+                                scope="playlist-modify-private playlist-modify-public playlist-read-private")
+    sp = spotipy.Spotify(auth_manager=auth_manager)
+    return sp
 
 
 def find_playlist(username, name, onlyown):
+    playlists = get_api(username).current_user_playlists()['items']
     for playlist in playlists:
         owner = playlist['owner']['id']
         if owner != username and (onlyown or owner != 'spotify'):
@@ -30,7 +36,7 @@ def find_or_create_playlist(username, name):
         return existing
 
     print(f'creating new playlist for {username}: {fullname}')
-    return sp.user_playlist_create(username, fullname, False, False, f'Alle {name.lower()} sinds {date.today().strftime("%d-%m-%Y")}')
+    return get_api(username).user_playlist_create(username, fullname, False, False, f'Alle {name.lower()} sinds {date.today().strftime("%d-%m-%Y")}')
 
 
 def run():
@@ -46,7 +52,7 @@ def run():
                 print(f'Could not find {src} for {username}')
                 continue
 
-            tracks = sp.playlist(playlist_id=srcpl['id'])['tracks']['items']
+            tracks = get_api(username).playlist(playlist_id=srcpl['id'])['tracks']['items']
             for track in tracks:
                 uris.append(track['track']['uri'])
 
@@ -56,7 +62,7 @@ def run():
 
         for target in targets:
             targetpl = find_or_create_playlist(username, target)
-            sp.playlist_add_items(playlist_id=targetpl['id'], items=uris)
+            get_api(username).playlist_add_items(playlist_id=targetpl['id'], items=uris)
 
         print(f'added {str(len(uris))} tracks to {str(len(targets))} playlists')
 
